@@ -1,7 +1,6 @@
 import re
 import random
-from itertools import permutations
-from collections import defaultdict
+import itertools
 
 edges = {}
 all_nodes = []
@@ -17,36 +16,40 @@ with open('day9.txt') as f:
         edges[source, destination] = int(distance)
         edges[destination, source] = int(distance)
 
-def in_subset(subset, slot):
-    return (1 << (slot - 1)) & subset
+def distance(i, j):
+    if (all_nodes[i], all_nodes[j]) in edges:
+        return edges[all_nodes[i], all_nodes[j]]
+    else:
+        return float("inf")
 
-def subset_except(subset, slot):
-    return subset ^ (1 << (slot - 1))
+def solve_tsp_dynamic(points, distf):
+    # calc all lengths
+    n = len(points)
+    all_distances = [[distf(x,y) for y in xrange(n)] for x in xrange(n)]
+    # initial value - just distance from 0 to every other point + keep the track of edges
+    A = {(frozenset([0, idx+1]), idx+1): (dist, [0,idx+1]) for idx, dist in enumerate(all_distances[0][1:])}
+    cnt = len(points)
+    for m in range(2, cnt):
+        B = {}
+        for S in [frozenset(C) | {0} for C in itertools.combinations(range(1, cnt), m)]:
+            for j in S - {0}:
+                B[(S, j)] = min( [(A[(S-{j},k)][0] + all_distances[k][j], A[(S-{j},k)][1] + [j]) for k in S if k != 0 and k!=j])  #this will use 0th index of tuple for ordering, the same as if key=itemgetter(0) used
+                print m, S, j
+        A = B
+    res = min([(A[d][0] + all_distances[0][d[1]], A[d][1]) for d in iter(A)])
+    return res[1]
 
-def dist(i, j):
-    return edges[all_nodes[i], all_nodes[j]]
+path = solve_tsp_dynamic(all_nodes, distance)
+route = map(lambda x: all_nodes[x], path)
+print route
+prev_point = None
 
-n = len(all_nodes)
-
-A = [[float("inf") for i in xrange(n)] for j in xrange(2**n)]
-# Base case
-A[1][1] = 0
-
-subsets = range(1, 2**n)
-for subset in sorted(subsets, key=lambda x: bin(x).count('1')):
-    if not in_subset(subset, 1):
-        # City #1 is not presented.
+cost = 0
+for i, point in enumerate(route):
+    if i == 0:
+        prev_point = point
         continue
-    for i in xrange(2, n + 1):
-        if not in_subset(subset, i):
-            # City #j is not presented.
-            continue
-        for j in xrange(1, n + 1):
-            if i == j or not in_subset(subset, j):
-                continue
-            print subset, i - 1, j - 1
-            A[subset][i - 1] = \
-                    min(A[subset][i - 1],
-                        A[subset_except(subset, i)][j - 1] + dist(i - 1, j - 1))
+    cost += edges[prev_point, point]
+    prev_point = point
+print cost
 
-print A
