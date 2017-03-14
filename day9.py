@@ -8,8 +8,12 @@ import re
 import random
 import itertools
 import pprint
+from collections import defaultdict
 
-edges = {}
+def infinity():
+    return float("inf")
+
+edges = defaultdict(infinity)
 all_nodes = []
 route_re = re.compile('(\w+) to (\w+) = (\d+)')
 with open('day9.txt') as f:
@@ -23,28 +27,33 @@ with open('day9.txt') as f:
         edges[source, destination] = int(distance)
         edges[destination, source] = int(distance)
 
-def distance(i, j):
-    if (all_nodes[i], all_nodes[j]) in edges:
-        return edges[all_nodes[i], all_nodes[j]]
-    else:
-        return 0
-
-
 n = len(all_nodes)
-matrix = [[distance(i, j) for i in xrange(n)] for j in xrange(n)]
 
-print all_nodes
-pprint.pprint(matrix)
+mincost = float("inf")
+maxcost = 0
+n = len(all_nodes)
+for route in itertools.permutations(all_nodes):
+    routecost = 0
+    for i in range(0, n-1):
+        routecost += edges[route[i], route[i+1]]
+    if routecost < mincost:
+        mincost = routecost
+        minroute = route
+    if routecost > maxcost:
+        maxcost = routecost
+        maxroute = route
 
-from pytsp import atsp_tsp, run, dumps_matrix
+def pretty_route(route):
+    pretty_route = ""
+    for i in range(0, n-1):
+        pretty_route += '  {} -> {} = {}\n'.format(route[i], route[i+1], edges[route[i], route[i+1]])
+    return pretty_route
 
-matrix_sym = atsp_tsp(matrix, strategy="avg")
-print matrix_sym
+print "Shortest route:"
+print pretty_route(minroute)
 
-outf = "/tmp/myroute.tsp"
-with open(outf, 'w') as dest:
-    dest.write(dumps_matrix(matrix_sym, name="My Route"))
+print "Longest route:"
+print pretty_route(maxroute)
 
-# tour = run(outf, start=10, solver="concorde")
-# print tour
+print "Min cost:", mincost, "max cost:", maxcost
 
