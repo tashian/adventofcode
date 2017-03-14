@@ -7,6 +7,7 @@
 import re
 import random
 import itertools
+import pprint
 
 edges = {}
 all_nodes = []
@@ -33,11 +34,12 @@ n = len(all_nodes)
 matrix = [[distance(i, j) for i in xrange(n)] for j in xrange(n)]
 
 print all_nodes
-print matrix
+pprint.pprint(matrix)
 
 from pytsp import atsp_tsp, run, dumps_matrix
 
 matrix_sym = atsp_tsp(matrix, strategy="avg")
+print matrix_sym
 
 outf = "/tmp/myroute.tsp"
 with open(outf, 'w') as dest:
