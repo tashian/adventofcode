@@ -2,17 +2,17 @@ import unittest
 
 def look_and_say(s):
     repetitions = 0
-    last_value = s[0]
-    result = ""
-    for i, ch in enumerate(str(s)):
-        if ch == last_value or i == 0:
+    last_seen = s[0]
+    said = ""
+    for i, ch in enumerate(s):
+        if ch == last_seen or i == 0:
             repetitions += 1
             continue
-        result += str(repetitions) + str(last_value)
-        last_value = ch
+        said += str(repetitions) + str(last_seen)
+        last_seen = ch
         repetitions = 1
-    result += str(repetitions) + str(last_value)
-    return summary
+    said += str(repetitions) + str(last_seen)
+    return said
 
 def look_and_say_n_times(s, times):
     for _ in range(times):
