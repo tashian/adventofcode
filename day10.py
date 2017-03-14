@@ -1,27 +1,23 @@
 import unittest
 
-def look_and_say(n):
+def look_and_say(s):
     repetitions = 0
-    last_value = n[0] 
-    summary = ""
-    for i, c in enumerate(str(n)):
-        # print "i:",i,'c:',c,'repetitions:',repetitions
-        if c == last_value or i == 0:
+    last_value = s[0]
+    result = ""
+    for i, ch in enumerate(str(s)):
+        if ch == last_value or i == 0:
             repetitions += 1
             continue
-        summary += "{}{}".format(repetitions, last_value)
-        last_value = c
+        result += str(repetitions) + str(last_value)
+        last_value = ch
         repetitions = 1
-        # print summary
-    summary += "{}{}".format(repetitions, last_value)
+    result += str(repetitions) + str(last_value)
     return summary
 
-def look_and_say_n_times(n, times):
+def look_and_say_n_times(s, times):
     for _ in range(times):
-        n = look_and_say(n)
-    return n
-
-print len(look_and_say_n_times('3113322113', 50))
+        s = look_and_say(s)
+    return s
 
 class TestLookAndSay(unittest.TestCase):
     def test_single_execution(self):
@@ -31,6 +27,7 @@ class TestLookAndSay(unittest.TestCase):
     def test_iterative_execution(self):
         self.assertEqual(look_and_say_n_times('1', 5), '312211')
 
+# print len(look_and_say_n_times('3113322113', 50))
+
 if __name__ == "__main__":
     unittest.main()
-

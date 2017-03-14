@@ -1,59 +1,55 @@
-# Depends on LKH TSP solver binary from http://www.akira.ruc.dk/~keld/research/LKH/
-# And on the pytsp package
-
-# Run this script as:
-#   LKH=path_to_LKH_binary python day9.py
-
 import re
 import random
 import itertools
 import pprint
 from collections import defaultdict
 
-def infinity():
-    return float("inf")
+class UndirectedGraph:
+    # edges are a dict in the form edges['A', 'B'] = 50,
+    # where 50 is the distance between nodes A and B.
+    def __init__(self, edges):
+        self.edges = edges
 
-edges = defaultdict(infinity)
-all_nodes = []
-route_re = re.compile('(\w+) to (\w+) = (\d+)')
-with open('day9.txt') as f:
-    for line in f:
-        matches = route_re.match(line)
-        source, destination, distance = matches.groups()
-        if source not in all_nodes:
-            all_nodes.append(source)
-        if destination not in all_nodes:
-            all_nodes.append(destination)
-        edges[source, destination] = int(distance)
-        edges[destination, source] = int(distance)
+    def distance(self, a, b):
+        if self.edges[a, b]:
+            return self.edges[a, b]
+        return float("inf")
 
-n = len(all_nodes)
+    def brute_force_tsp(self):
+        all_nodes = set(sum(self.edges.keys(), ()))
+        n = len(all_nodes)
+        min_cost = float("inf")
+        max_cost = 0
+        for route in itertools.permutations(all_nodes):
+            route_cost = 0
+            for i in range(0, n-1):
+                route_cost += self.distance(route[i], route[i+1])
+            if route_cost < min_cost:
+                min_cost, min_route = route_cost, route
+            if route_cost > max_cost:
+                max_cost, max_route = route_cost, route
+        return Route(min_route, min_cost), Route(max_route, max_cost)
 
-mincost = float("inf")
-maxcost = 0
-n = len(all_nodes)
-for route in itertools.permutations(all_nodes):
-    routecost = 0
-    for i in range(0, n-1):
-        routecost += edges[route[i], route[i+1]]
-    if routecost < mincost:
-        mincost = routecost
-        minroute = route
-    if routecost > maxcost:
-        maxcost = routecost
-        maxroute = route
+class Route:
+    def __init__(self, route, cost):
+        self.route = route
+        self.cost = cost
 
-def pretty_route(route):
-    pretty_route = ""
-    for i in range(0, n-1):
-        pretty_route += '  {} -> {} = {}\n'.format(route[i], route[i+1], edges[route[i], route[i+1]])
-    return pretty_route
+    def pretty_print(self):
+        pretty_route = ' -> '.join(self.route)
+        pretty_route += '\nCost: ' + str(self.cost)
+        print pretty_route
 
-print "Shortest route:"
-print pretty_route(minroute)
+def run_from_input_file():
+    edges = {}
+    all_nodes = []
+    with open('day9.txt') as f:
+        route_re = re.compile('(\w+) to (\w+) = (\d+)')
+        for line in f:
+            matches = route_re.match(line)
+            source, destination, distance = matches.groups()
+            edges[source, destination] = int(distance)
+            edges[destination, source] = int(distance)
+    map(Route.pretty_print, UndirectedGraph(edges).brute_force_tsp())
 
-print "Longest route:"
-print pretty_route(maxroute)
-
-print "Min cost:", mincost, "max cost:", maxcost
-
+run_from_input_file()
