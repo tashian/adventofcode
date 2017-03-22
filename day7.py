@@ -36,8 +36,7 @@ class Node:
     def _resolve(self, val):
         if type(val) is int:
             return val
-        else:
-            return self.net.evaluate(val)
+        return self.net.evaluate(val)
 
     @abc.abstractmethod
     def _evaluate(self):
