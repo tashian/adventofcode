@@ -1,12 +1,21 @@
-import regex
+import json
+  
+def descend(j):
+    total = 0
+    check_red = False
+    if type(j) == dict:
+        j = j.values()
+        check_red = True
+    for i in j:
+        if check_red and type(i) is unicode and i == "red":
+            return 0
+        if type(i) is dict or type(i) is list:
+            total += descend(i)
+        elif type(i) is int:
+            total += i
+    return total
 
-NUMBERS = regex.compile(r'-?\d+')
-RED = regex.compile(r'\{(?>[^{]*:"red[^}]*|(?R))*\}')
-
-numbers = []
 with open('day12.txt') as f:
-    for line in f:
-        line = RED.sub('', line)
-        numbers += NUMBERS.findall(line)
+    j = json.load(f)
 
-print sum([int(x) for x in numbers])
+print descend(j)
