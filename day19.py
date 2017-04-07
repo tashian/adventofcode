@@ -6,33 +6,45 @@ import re
 class FusionPlant(object):
     def __init__(self, reactions):
         self.reactions = reactions
+	self.molecules = Molecules([r[0] for r in self.reactions])
 
-    def all_possible_molecules(self, starting_molecule):
-	molecules = self.deconstruct_starting_molecule(starting_molecule)
+    def replacements(self, starting_molecule):
+        self.decompose_starting_molecule(starting_molecule)
 
-	# Put all transformations into a set
 	transformations = set()
-	for i, (molecule, loc) in enumerate(molecules):
-	    for reaction in self.reactions:
-		if reaction[0] == molecule:
-                    transformed_molecule = starting_molecule[0:loc] + reaction[1] + starting_molecule[loc+len(molecule):]
-		    transformations.add(transformed_molecule)
+	for i, (molecule, loc) in enumerate(self.molecules):
+	    for reaction in self.reactions_for(molecule):
+                transformations.add(self.transform(starting_molecule, loc, reaction))
 	return transformations
 
-    def deconstruct_starting_molecule(self, starting_molecule):
-        # Break up starting molecule into a list of all single- and two-letter
-        # values, in order
-        letters = list(starting_molecule)
-	molecules = []
-	for i, letter in enumerate(letters):
-	    molecules.append((letter, i))
-	    if i < len(letters)-1:
-	        molecules.append((letters[i] + letters[i+1], i))
+    def reactions_for(self, molecule):
+        for reaction in self.reactions:
+            if reaction[0] == molecule:
+                yield reaction
 
-        # Filter based on the reactions available
-	reactants = [x[0] for x in self.reactions]
-        molecules = list(ifilter(lambda z: z[0] in reactants, molecules))
-	return molecules
+    def transform(self, starting_molecule, loc, reaction):
+        return starting_molecule[0:loc] + reaction[1] + starting_molecule[loc+len(reaction[0]):]
+
+    def decompose_starting_molecule(self, starting_molecule):
+        # Break up starting molecule into a list of all single- and two-letter
+        # values, in order, with their location in the starting molecule
+        letters = list(starting_molecule)
+	for i, letter in enumerate(letters):
+	    self.molecules.add((letter, i))
+            if i < len(letters) - 1:
+                self.molecules.add((letters[i] + letters[i+1], i))
+
+class Molecules(object):
+    def __init__(self, reactants):
+        self.reactants = reactants
+        self.molecules = []
+
+    def add(self, molecule):
+        if molecule[0] in self.reactants:
+            self.molecules.append(molecule)
+
+    def __iter__(self):
+        return iter(self.molecules)
 
 if __name__ == '__main__':
     LINE_FORMAT = re.compile(r'(\w+) => (\w+)')
@@ -44,6 +56,6 @@ if __name__ == '__main__':
                 reactions.append(matches.groups())
             elif len(line) > 1:
                 plant = FusionPlant(reactions)
-                transformations = plant.all_possible_molecules(line)
+                transformations = plant.replacements(line)
                 print len(transformations)
 

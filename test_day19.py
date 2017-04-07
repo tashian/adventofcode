@@ -13,8 +13,8 @@ class TestFusionPlant(unittest.TestCase):
 
     def test_generate_molecules(self):
         plant = FusionPlant(self.TEST_REACTIONS)
-        self.assertEqual(len(plant.all_possible_molecules('HOH')), 4)
-        self.assertEqual(len(plant.all_possible_molecules('HOHOHO')), 7)
+        self.assertEqual(len(plant.replacements('HOH')), 4)
+        self.assertEqual(len(plant.replacements('HOHOHO')), 7)
 
 if __name__ == '__main__':
     unittest.main()
