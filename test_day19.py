@@ -16,9 +16,5 @@ class TestFusionPlant(unittest.TestCase):
         self.assertEqual(len(plant.all_possible_molecules('HOH')), 4)
         self.assertEqual(len(plant.all_possible_molecules('HOHOHO')), 7)
 
-    def test_edge_cases(self):
-        plant = FusionPlant([('iC','aC'), ('Ti','Ta'), ('Ca', 'CaCa')])
-        print plant.all_possible_molecules('TiCa')
-
 if __name__ == '__main__':
     unittest.main()
