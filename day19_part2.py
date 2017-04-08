@@ -7,7 +7,6 @@
 # and moving toward the shortest, looking for opportunities to reduce the total
 # length of the molecule the most with each reduction.
 #
-from itertools import ifilter
 import re
 
 def main():
@@ -26,7 +25,7 @@ def main():
     replacements = 0
     while repeating:
         repeating = False
-        for product in sorted(reactions_by_product.keys(), key=lambda x: 0-len(x)):
+        for product in sorted(reactions_by_product.keys(), key=lambda x: len(x), reverse=True):
             while product in starting_molecule:
                 print "replacing", product, "with", reactions_by_product[product]
                 repeating = True
