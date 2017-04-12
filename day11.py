@@ -1,9 +1,10 @@
 import unittest
 import re
+import utils
 
 def next_password(n):
     while True:
-        pw = baseN(n)
+        pw = utils.baseN(n)
         n += 1
         if contains_restricted_letters(pw):
             continue
@@ -32,21 +33,15 @@ def contains_pairs(pw):
         return True
     return False
 
-def baseN(num, b = 26, numerals = "abcdefghijklmnopqrstuvwxyz"):
-    return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
-
 class TestCorporatePolicy(unittest.TestCase):
     def test_contains_straight(self):
         self.assertEqual(contains_straight('aabc'), True)
-        self.assertEqual(contains_straight('anrkfbca', False)
+        self.assertEqual(contains_straight('anrkfbca'), False)
 
     def test_contains_pairs(self):
         self.assertEqual(contains_pairs('aabb'), True)
         self.assertEqual(contains_pairs('daakrccj'), True)
         self.assertEqual(contains_pairs('aaakrzzj'), True)
-
-    def test_baseN(self):
-        self.assertEqual(baseN(57647112526), 'hepxcrrq')
 
 # print next_password(57647112526)
 # print next_password(57647486572)

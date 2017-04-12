@@ -7,6 +7,7 @@
 # and moving toward the shortest, looking for opportunities to reduce the total
 # length of the molecule the most with each reduction.
 #
+import utils
 import re
 
 def main():
@@ -31,7 +32,7 @@ def main():
                 repeating = True
                 loc = starting_molecule.find(product)
                 replacements += 1
-                starting_molecule = string_replace(
+                starting_molecule = utils.string_replace(
                     starting_molecule,
                     loc,
                     loc + len(product),
@@ -40,10 +41,6 @@ def main():
             if repeating:
                 break
     print replacements, "replacements"
-
-# This does the actual transformation and returns the result
-def string_replace(s, start, end, replace_with):
-    return s[0:start] + replace_with + s[end:]
 
 if __name__ == '__main__':
     main()
