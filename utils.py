@@ -2,8 +2,6 @@
 def baseN(num, b = 26, numerals = "abcdefghijklmnopqrstuvwxyz"):
     return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
 
-assert(baseN(57647112526) == 'hepxcrrq')
-
 # Fast factoring via http://stackoverflow.com/questions/6800193/what-is-the-most-efficient-way-of-finding-all-the-factors-of-a-number-in-python
 def factors(n):
     return set(reduce(list.__add__, 
@@ -30,12 +28,4 @@ def contains_isolated_repeated_letter(s):
         if i+2 == len(s)-1:
             break
     return False
-
-assert contains_two_distinct_letter_pairs('aabcdefgaa') == True
-assert contains_two_distinct_letter_pairs('hello') == False
-assert contains_two_distinct_letter_pairs('aaa') == False
-assert contains_isolated_repeated_letter('xyx') == True
-assert contains_isolated_repeated_letter('hello') == False
-assert contains_isolated_repeated_letter('zz') == False
-assert contains_isolated_repeated_letter('abcdefeghi') == True
 
