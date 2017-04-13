@@ -12,7 +12,7 @@ def string_replace(s, start, end, replace_with):
     return s[0:start] + replace_with + s[end:]
 
 def contains_two_distinct_letter_pairs(s):
-    for i, couplet in enumerate(zip(s[0::1], s[1::1])):
+    for i, couplet in enumerate(zip(s[0:], s[1:])):
         if i == len(s)-2:
             return False
         for j in range(i+2, len(s)-1):

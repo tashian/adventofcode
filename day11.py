@@ -22,7 +22,7 @@ def contains_restricted_letters(pw):
 
 def contains_straight(pw):
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    for triplets in zip(alphabet[0::1], alphabet[1::1], alphabet[2::1]):
+    for triplets in zip(alphabet[0:], alphabet[1:], alphabet[2:]):
         if ''.join(triplets) in pw:
             return True
     return False
