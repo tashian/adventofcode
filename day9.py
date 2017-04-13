@@ -22,7 +22,7 @@ class UndirectedGraph:
         max_cost = 0
         for route in itertools.permutations(all_nodes):
             route_cost = 0
-            for i in range(0, n-1):
+            for i in xrange(0, n-1):
                 route_cost += self.distance(route[i], route[i+1])
             if route_cost < min_cost:
                 min_cost, min_route = route_cost, route

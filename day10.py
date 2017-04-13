@@ -15,7 +15,7 @@ def look_and_say(s):
     return said
 
 def look_and_say_n_times(s, times):
-    for _ in range(times):
+    for _ in xrange(times):
         s = look_and_say(s)
     return s
 

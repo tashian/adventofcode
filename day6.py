@@ -5,7 +5,7 @@ class LightGrid():
         self.grid = self.emptyGrid()
         
     def emptyGrid(self):
-        return [[False for k in range(1000)] for k in range(1000)]
+        return [[False for k in xrange(1000)] for k in xrange(1000)]
 
     def turnOn(self, x1, y1, x2, y2):
         for i, j in self._gridRect(x1, y1, x2, y2):
@@ -20,11 +20,11 @@ class LightGrid():
            self.grid[i][j] = not self.grid[i][j]
 
     def sum(self):
-        return sum([self.grid[i].count(True) for i in range(0, 1000)])
+        return sum([self.grid[i].count(True) for i in xrange(0, 1000)])
 
     def _gridRect(self, x1 = 0, y1 = 0, x2 = 1000, y2 = 1000):
-        for i in range(x1, x2+1):
-            for j in range(y1, y2+1):
+        for i in xrange(x1, x2+1):
+            for j in xrange(y1, y2+1):
                 yield i, j 
 
 myGrid = LightGrid()
