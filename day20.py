@@ -1,5 +1,4 @@
 # Infinite Elves and Infinite Houses
-import sys
 import utils
 
 def presents_for_house(n):

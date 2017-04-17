@@ -2,8 +2,7 @@
 # 1119195 is too high.
 
 import utils
-import sys
-from collections import deque, defaultdict
+from collections import defaultdict
 
 class Elf:
     def __init__(self):
