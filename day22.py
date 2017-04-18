@@ -14,7 +14,7 @@ class Spell(object):
         self.target = target
 
     def cast(self):
-        logging.debug("Attacker cast " + self.__class__.__name__)
+        logging.debug("Wizard casts {} costing {}".format(self.__class__.__name__, self.__class__.cost))
         self.attacker.mana -= self.__class__.cost
 
     def __repr__(self):
@@ -203,9 +203,9 @@ class Fight():
     def determine_winner(self):
         if not self.winner:
             if self.boss.hitpoints <= 0:
-                self.winner = self.boss
-            if self.wizard.hitpoints <= 0:
                 self.winner = self.wizard
+            if self.wizard.hitpoints <= 0:
+                self.winner = self.boss
         return self.winner
 
 BOSS_HITPOINTS = 51
