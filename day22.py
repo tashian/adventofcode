@@ -11,7 +11,7 @@ MY_HITPOINTS = 50
 MY_MANA = 500
 MIN_MANA = 53
 ENABLE_PART_TWO = True
-ENABLE_LOGGING = True
+ENABLE_LOGGING = False
 
 class Spell(object):
     def __init__(self, attacker, target):
@@ -45,19 +45,15 @@ class Effect(object):
         logging.debug("Effect " + self.__class__.__name__ + " started")
         self.attacker = attacker
         self.target = target
-        self.turns_remaining = self.__class__.turns
         self.attacker.mana -= self.__class__.cost
 
     def begin(self):
         pass
 
-    def apply(self):
-        if self.__class__.turns == self.turns_remaining:
-            self.begin()
-        self.turns_remaining -= 1
-        logging.debug("Effect {} applied; has {} turns reminaing".format(self.__class__.__name__, self.turns_remaining))
-
     def wear_off(self):
+        pass
+    
+    def run(self):
         pass
 
     def is_wearing_off(self):
@@ -77,16 +73,14 @@ class PoisonEffect(Effect):
     cost = 173
     turns = 6
 
-    def apply(self):
-        super(self.__class__, self).apply()
+    def run(self):
         self.target.hitpoints -= 3
 
 class RechargeEffect(Effect):
     cost = 229
     turns = 5
 
-    def apply(self):
-        super(self.__class__, self).apply()
+    def run(self):
         self.attacker.mana += 101
 
 class NPC(object):
@@ -115,73 +109,89 @@ class Warrior(NPC):
 class Wizard(NPC):
     def __init__(self, hitpoints, **kwargs):
         super(self.__class__, self).__init__(hitpoints, **kwargs)
-        self.magic_manager = self.MagicManager()
+        self.magic_chooser = self.MagicChooser()
+        self.effect_runner = self.EffectRunner()
 
     # Wizard casts a spell or effect every turn.
     # - Mana is deducted immediately
     # - Spells have immediate impact
     # - Effects do not
     def fight(self, target):
-        self.magic_manager.start(
-            self.magic_manager.next_magic(self.mana)(self, target)
+        self.choose_magic(
+            self.magic_chooser.next_magic(
+                self.mana,
+                self.effect_runner.active_effects_by_class()
+            )(self, target)
         )
 
+    def choose_magic(self, magic):
+        if issubclass(magic.__class__, Effect):
+            self.effect_runner.add(magic)
+        else:
+            magic.cast()
+
     def pre_fight(self):
-        self.magic_manager.apply_effects()
+        self.effect_runner.run()
 
     def mana_spent(self):
-        return self.magic_manager.cost()
+        return self.magic_chooser.cost()
+
+    def magic_used(self):
+        return self.magic_chooser.magic_used
 
     def can_fight(self):
         return self.mana >= MIN_MANA
 
-    class MagicManager():
+    class MagicChooser():
         ALL_MAGIC = Spell.__subclasses__() + Effect.__subclasses__()
 
         def __init__(self):
-            self.active_effects = []
             self.magic_used = []
 
         def cost(self):
             return sum(magic.cost for magic in self.magic_used)
 
-        def apply_effects(self):
-            # Apply active effects and remove any effects that have worn out
-            for effect in self.active_effects:
-                effect.apply()
-                if effect.is_wearing_off():
-                    effect.wear_off()
-                    self.active_effects.remove(effect)
-
-        def start(self, magic):
-            if issubclass(magic.__class__, Effect):
-                self.active_effects.append(magic)
-            else:
-                magic.cast()
-
-            self.magic_used.append(magic.__class__)
-
         ## Choosing which spells to cast, and when:
-        # Approach: Let's try random selection!
         # - Repeated cast of the same spell are fine
         # - Player cannot cast an effect already in progress
         # - Only choose spells player can afford
-        # We just need to select one at random from (all available spells - effects in progress)
-        def next_magic(self, available_mana):
+        def next_magic(self, available_mana, active_effects):
             import random
-            return random.choice(self.magic_options(available_mana))
+            magic = random.choice([
+                magic for magic in self.magic_options(available_mana)
+                if magic not in active_effects
+            ])
+            self.magic_used.append(magic)
+            return magic
 
         def magic_options(self, available_mana):
-            return [magic for magic in self.available_spells_and_effects()
+            return [magic for magic in self.__class__.ALL_MAGIC
                     if magic.cost <= available_mana]
+
+    class EffectRunner():
+        def __init__(self):
+            self.active_effects = {}
+
+        def add(self, effect):
+            self.active_effects[effect] = effect.turns
+
+        def apply(self, effect):
+            if effect.turns == self.active_effects[effect]:
+                effect.begin()
+            self.active_effects[effect] -= 1
+            effect.run()
+            logging.debug("Effect {} applied; has {} turns reminaing".format(effect.__class__.__name__, self.active_effects[effect]))
+
+        def run(self):
+            # Apply active effects and remove any effects that have worn out
+            for effect in self.active_effects.keys():
+                self.apply(effect)
+                if self.active_effects[effect] == 0:
+                    effect.wear_off()
+                    del self.active_effects[effect]
 
         def active_effects_by_class(self):
             return [effect.__class__ for effect in self.active_effects]
-
-        def available_spells_and_effects(self):
-            return [magic for magic in self.__class__.ALL_MAGIC
-                    if magic not in self.active_effects_by_class()]
-
 
 class Fight():
     def __init__(self, player, boss):
@@ -230,16 +240,14 @@ class Fight():
 
 def main():
     min_cost = 100000
-    for i in range(10000):
+    for i in range(100000):
         logging.debug("------- New fight ---------")
         boss = Warrior(BOSS_HITPOINTS, damage=BOSS_DAMAGE)
         me = Wizard(MY_HITPOINTS, mana=MY_MANA)
         fight = Fight(me, boss).go()
         if fight.winner == me:
-            cost = me.mana_spent()
-            logging.debug("Player wins fight with cost {}.".format(cost))
-            if cost < min_cost:
-                min_cost = cost
+            min_cost = min(me.mana_spent(), min_cost)
+            logging.debug("Player wins fight with cost {}.".format(min_cost))
         else:
             logging.debug("Boss wins fight.")
     print min_cost
