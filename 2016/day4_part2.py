@@ -1,8 +1,7 @@
 from collections import Counter
 import re
 
-
-def most_common_letters(s):
+def checksum(s):
     # s = "bhha"
     counts = Counter(s)
     del counts['-']
@@ -18,9 +17,8 @@ def most_common_letters(s):
 
     return ''.join([i[0] for i in l[:5]])
 
-assert(most_common_letters("aaaaa-bbb-z-y-x") == "abxyz")
-assert(most_common_letters("a-b-c-d-ee-f-g-h") == "eabcd")
-assert(most_common_letters("aaa") == "a")
+assert(checksum("aaaaa-bbb-z-y-x") == "abxyz")
+assert(checksum("a-b-c-d-ee-f-g-h") == "eabcd")
 
 def decode(s):
     LINE = re.compile('([a-z+\-]*)-(\d+)\[(\w+)]')
@@ -42,8 +40,7 @@ assert(rot("qzmt-zixmtkozy-ivhz", 343) == "very encrypted name")
 with open('day4.txt') as f:
     i = 0
     for line in f:
-        encrypted, sid, checksum = decode(line)
-        if most_common_letters(encrypted) == checksum:
+        encrypted, sid, check = decode(line)
+        if checksum(encrypted) == check:
             if rot(encrypted, int(sid)).endswith('storage'):
                 print(sid, rot(encrypted, int(sid)))
-

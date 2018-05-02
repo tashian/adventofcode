@@ -1,18 +1,16 @@
-from collections import defaultdict
+from collections import Counter
 import re
 
-def most_common_letters(s):
-    counts = defaultdict(int)
-    for i in list(s):
-        if i != '-':
-            counts[i] += 1 
-    l = sorted(counts.iteritems(), key=lambda (k,v): (v,k))
+def checksum(s):
+    counts = Counter(s)
+    del counts['-']
+    l = sorted(counts.items(), key=lambda v: (v[0],v[1]))
     l = sorted(l, key=lambda i: i[1], reverse=True)
     return ''.join([i[0] for i in l[:5]])
 
-assert(most_common_letters("aaaaa-bbb-z-y-x") == "abxyz")
-assert(most_common_letters("a-b-c-d-ee-f-g-h") == "eabcd")
-assert(most_common_letters("aaa") == "a")
+assert(checksum("aaaaa-bbb-z-y-x") == "abxyz")
+assert(checksum("a-b-c-d-ee-f-g-h") == "eabcd")
+assert(checksum("aaa") == "a")
 
 def decode(s):
     LINE = re.compile('([a-z+\-]*)-(\d+)\[(\w+)]')
@@ -21,9 +19,7 @@ def decode(s):
 with open('day4.txt') as f:
     i = 0
     for line in f:
-        encrypted, sid, checksum = decode(line)
-        if most_common_letters(encrypted) == checksum:
+        encrypted, sid, check = decode(line)
+        if checksum(encrypted) == check:
             i += int(sid)
     print(i)
-        
-
