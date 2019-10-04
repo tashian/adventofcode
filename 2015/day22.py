@@ -1,8 +1,8 @@
-# Wizard Simulator 20XX
+# i Wizard Simulator 20XX
 #
 # Rather than figuring out the optimal pattern of magic to apply,
 # my approach is to try 100000 random fights to determine minimum mana.
-# 
+#
 import logging
 
 BOSS_HITPOINTS = 51
@@ -13,17 +13,24 @@ MIN_MANA = 53
 ENABLE_PART_TWO = True
 ENABLE_LOGGING = False
 
+
 class Spell(object):
+
     def __init__(self, attacker, target):
         self.attacker = attacker
         self.target = target
 
     def cast(self):
-        logging.debug("Wizard casts {} costing {}".format(self.__class__.__name__, self.__class__.cost))
+        logging.debug(
+            "Wizard casts {} costing {}".format(
+                self.__class__.__name__, self.__class__.cost
+            )
+        )
         self.attacker.mana -= self.__class__.cost
 
     def __repr__(self):
         return self.name
+
 
 class MagicMissileSpell(Spell):
     cost = 53
@@ -31,6 +38,7 @@ class MagicMissileSpell(Spell):
     def cast(self):
         super(self.__class__, self).cast()
         self.target.hitpoints -= 4
+
 
 class DrainSpell(Spell):
     cost = 73
@@ -40,7 +48,9 @@ class DrainSpell(Spell):
         self.target.hitpoints -= 2
         self.attacker.hitpoints += 2
 
+
 class Effect(object):
+
     def __init__(self, attacker, target):
         logging.debug("Effect " + self.__class__.__name__ + " started")
         self.attacker = attacker
@@ -52,12 +62,13 @@ class Effect(object):
 
     def wear_off(self):
         pass
-    
+
     def run(self):
         pass
 
     def is_wearing_off(self):
         return self.turns_remaining == 0
+
 
 class ShieldEffect(Effect):
     cost = 113
@@ -69,12 +80,14 @@ class ShieldEffect(Effect):
     def wear_off(self):
         self.attacker.armor -= 7
 
+
 class PoisonEffect(Effect):
     cost = 173
     turns = 6
 
     def run(self):
         self.target.hitpoints -= 3
+
 
 class RechargeEffect(Effect):
     cost = 229
@@ -83,12 +96,14 @@ class RechargeEffect(Effect):
     def run(self):
         self.attacker.mana += 101
 
+
 class NPC(object):
+
     def __init__(self, hitpoints, **kwargs):
         self.hitpoints = hitpoints
-        self.damage = kwargs.pop('damage', 0)
-        self.armor = kwargs.pop('armor', 0)
-        self.mana = kwargs.pop('mana', 0)
+        self.damage = kwargs.pop("damage", 0)
+        self.armor = kwargs.pop("armor", 0)
+        self.mana = kwargs.pop("mana", 0)
 
     def pre_fight(self):
         pass
@@ -99,14 +114,17 @@ class NPC(object):
     def mana_spent(self):
         return 0
 
+
 class Warrior(NPC):
     # Warrior attacks for (their damage - player's armor) (min 1)
     def fight(self, target):
-        damage = max(1, self.damage - target.armor) 
+        damage = max(1, self.damage - target.armor)
         logging.debug("Boss deals {} damage".format(damage))
         target.hitpoints -= damage
 
+
 class Wizard(NPC):
+
     def __init__(self, hitpoints, **kwargs):
         super(self.__class__, self).__init__(hitpoints, **kwargs)
         self.magic_chooser = self.MagicChooser()
@@ -119,8 +137,7 @@ class Wizard(NPC):
     def fight(self, target):
         self.choose_magic(
             self.magic_chooser.next_magic(
-                self.mana,
-                self.effect_runner.active_effects_by_class()
+                self.mana, self.effect_runner.active_effects_by_class()
             )(self, target)
         )
 
@@ -142,7 +159,7 @@ class Wizard(NPC):
     def can_fight(self):
         return self.mana >= MIN_MANA
 
-    class MagicChooser():
+    class MagicChooser:
         ALL_MAGIC = Spell.__subclasses__() + Effect.__subclasses__()
 
         def __init__(self):
@@ -157,18 +174,26 @@ class Wizard(NPC):
         # - Only choose spells player can afford
         def next_magic(self, available_mana, active_effects):
             import random
-            magic = random.choice([
-                magic for magic in self.magic_options(available_mana)
-                if magic not in active_effects
-            ])
+
+            magic = random.choice(
+                [
+                    magic
+                    for magic in self.magic_options(available_mana)
+                    if magic not in active_effects
+                ]
+            )
             self.magic_used.append(magic)
             return magic
 
         def magic_options(self, available_mana):
-            return [magic for magic in self.__class__.ALL_MAGIC
-                    if magic.cost <= available_mana]
+            return [
+                magic
+                for magic in self.__class__.ALL_MAGIC
+                if magic.cost <= available_mana
+            ]
 
-    class EffectRunner():
+    class EffectRunner:
+
         def __init__(self):
             self.active_effects = {}
 
@@ -180,7 +205,11 @@ class Wizard(NPC):
                 effect.begin()
             self.active_effects[effect] -= 1
             effect.run()
-            logging.debug("Effect {} applied; has {} turns reminaing".format(effect.__class__.__name__, self.active_effects[effect]))
+            logging.debug(
+                "Effect {} applied; has {} turns reminaing".format(
+                    effect.__class__.__name__, self.active_effects[effect]
+                )
+            )
 
         def run(self):
             # Apply active effects and remove any effects that have worn out
@@ -193,7 +222,9 @@ class Wizard(NPC):
         def active_effects_by_class(self):
             return [effect.__class__ for effect in self.active_effects]
 
-class Fight():
+
+class Fight:
+
     def __init__(self, player, boss):
         self.attacker = self.player = player
         self.target = self.boss = boss
@@ -221,10 +252,17 @@ class Fight():
         return self
 
     def log_summary(self):
+
         def summarize_npc(npc):
-            logging.debug("{} has {} hitpoints; {} damage; {} armor; {} mana.".format(
-                npc.__class__.__name__, npc.hitpoints, npc.damage, npc.armor, npc.mana
-            ))
+            logging.debug(
+                "{} has {} hitpoints; {} damage; {} armor; {} mana.".format(
+                    npc.__class__.__name__,
+                    npc.hitpoints,
+                    npc.damage,
+                    npc.armor,
+                    npc.mana,
+                )
+            )
 
         logging.debug("-- " + self.attacker.__class__.__name__ + "'s turn --")
         summarize_npc(self.attacker)
@@ -238,6 +276,7 @@ class Fight():
                 self.winner = self.boss
         return self.winner
 
+
 def main():
     min_cost = 100000
     for i in range(100000):
@@ -250,9 +289,10 @@ def main():
             logging.debug("Player wins fight with cost {}.".format(min_cost))
         else:
             logging.debug("Boss wins fight.")
-    print min_cost
+    print(min_cost)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if ENABLE_LOGGING:
-        logging.basicConfig(filename='day22.log', filemode='w', level=logging.DEBUG)
+        logging.basicConfig(filename="day22.log", filemode="w", level=logging.DEBUG)
     main()
