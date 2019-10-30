@@ -2,6 +2,16 @@
 def baseN(num, b = 26, numerals = "abcdefghijklmnopqrstuvwxyz"):
     return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
 
+def list_of_lists(rows, cols, zerovalue=None):
+    return [[zerovalue for k in range(rows)] for k in range(cols)]
+
+def rotate_list(l, d=1):
+   if len(l) == 0 or d == 0:
+      return l
+   d = -d % len(l)     # flip rotation direction
+   return l[d:] + l[:d]
+
+
 # Fast factoring via http://stackoverflow.com/questions/6800193/what-is-the-most-efficient-way-of-finding-all-the-factors-of-a-number-in-python
 def factors(n):
     return set(reduce(list.__add__, 
