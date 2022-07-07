@@ -22,16 +22,16 @@ def frequency_bit(data, position, fn):
 
     return fn(column)
 
-o2_lines = copy.deepcopy(data)
-co2_lines = copy.deepcopy(data)
+o2_lines = data
+co2_lines = copy.copy(data)
 bitlength = len(data[0])
 for position in range(bitlength):
    most = frequency_bit(o2_lines, position, most_common_bit)
    least = frequency_bit(co2_lines, position, least_common_bit)
 
    if len(o2_lines) > 1:
-       o2_lines = [line for line in o2_lines if line[pos] == most]
+       o2_lines = [line for line in o2_lines if line[position] == most]
    if len(co2_lines) > 1:
-       co2_lines = [line for line in co2_lines if line[pos] == least]
+       co2_lines = [line for line in co2_lines if line[position] == least]
 
 print(int(o2_lines[0], 2) * int(co2_lines[0], 2))
